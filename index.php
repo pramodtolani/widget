@@ -7,15 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test widget</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 </head>
 
 <body>
   <div id="root"></div>
   <script>
+    let latestJQ;
+
     function loadScript(url, cb) {
       try {
         var script = document.createElement("script")
         script.type = "text/javascript";
+
 
         if (script.readyState) { //IE
           script.onreadystatechange = function() {
@@ -29,6 +33,7 @@
             if (!window.jQuery) {
               console.log("jQuery not loaded.");
             } else {
+              latestJQ = window.jQuery.noConflict(true);
               cb();
             }
           };
@@ -45,40 +50,35 @@
       }
     }
 
-    async function bootstrap() {
-      await fetch("form.txt").then(res => res.text()).then(res => {
+    function bootstrap() {
+      fetch("form.txt").then(res => res.text()).then(res => {
         document.getElementById("root").innerHTML = res;
-      }).catch(err => console.log("err: ", err));
-
-      jQuery(document).on("submit", "#widgetFrm", function(e) {
+        latestJQ(document).on("submit", "#widgetFrm", function(e) {
           e.preventDefault();
           let data = {
-            body: jQuery("#exampleInputSalary").val(),
-            title: jQuery("#exampleInputName").val(),
+            body: latestJQ("#exampleInputSalary").val(),
+            title: latestJQ("#exampleInputName").val(),
             // salary: jQuery(document, "#exampleInputSalary").val(),
           };
-          jQuery.ajax({
-              url: "https://jsonplaceholder.typicode.com/posts",
-              type: "post",
-              data,
-              // dataType: "application/json",
-              success: function() {
-                alert("form submitted");
-              },
-              error: function(XMLHttpRequest, textStatus, errorThrown) {
-                alert("Something went wrong.");
-              }
-            });
-          })
-      }
+          latestJQ.ajax({
+            url: "https://jsonplaceholder.typicode.com/posts",
+            type: "post",
+            data,
+            // dataType: "application/json",
+            success: function() {
+              alert("form submitted");
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+              alert("Something went wrong.");
+            }
+          });
+        })
+      }).catch(err => console.log("err: ", err));
+    }
 
-      window.onload = _ => {
-        (async _ => {
-          if (!window.jQuery || !window.jQuery.ajax) {
-            loadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.jsasdasd', bootstrap);
-          }
-        })();
-      }
+    window.onload = _ => {
+      loadScript('https://code.jquery.com/jquery-3.5.1.js', bootstrap);
+    }
   </script>
 </body>
 
